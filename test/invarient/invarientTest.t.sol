@@ -13,10 +13,10 @@ contract AMMTest is Test {
     AMM amm = new AMM(address(token1), address(token2), 1000, 1000);
 
 
-    function testConstantProduct() public {
-        uint256 token1reserve = AMM.token1reserve();
-        uint256 token2reserve = AMM.token2reserve();
-        uint256 constantProduct = AMM.constantProduct();
+    function testConstantProduct() public view{
+        uint256 token1reserve = amm.token1reserve();
+        uint256 token2reserve = amm.token2reserve();
+        uint256 constantProduct = amm.constantProduct();
         console.log("token1reserve: ", token1reserve);
         console.log("token2reserve: ", token2reserve);
         console.log("constantProduct: ", constantProduct);
@@ -28,7 +28,7 @@ contract AMMTest is Test {
         assertEq(amm.totalSupply(), 1000);
     }
 
-    function testNonNegative() public {
+    function testNonNegative() public view {
         assertGe(amm.token1reserve(), 0);
         assertGe(amm.token2reserve(), 0);
     }
@@ -36,7 +36,7 @@ contract AMMTest is Test {
     function testRemoveLiquidity() public {
         amm.addLiquidity(1000, 1000);
         uint256 initialSupply = amm.totalSupply();
-        amm.removeLiquidity(500, 500);
+        amm.removeLiquidity(500);
         assertEq(amm.totalSupply(), initialSupply - 500);
     }
 
@@ -44,7 +44,7 @@ contract AMMTest is Test {
         amm.addLiquidity(1000, 1000);
         uint256 initialToken1Reserve = amm.token1reserve();
         uint256 initialToken2Reserve = amm.token2reserve();
-        amm.swap(100, 100);
+        amm.swap(address(token1), 100);
         assertEq(amm.token1reserve(), initialToken1Reserve + 100);
         assertEq(amm.token2reserve(), initialToken2Reserve - 100);
     }

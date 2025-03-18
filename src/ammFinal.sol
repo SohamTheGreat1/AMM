@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract AMM{
     IERC20 public immutable token1;
@@ -130,4 +130,5 @@ contract AMM{
     function getConstantProduct() public view returns (uint256) {
         return constantProduct;
     }
+
 }
