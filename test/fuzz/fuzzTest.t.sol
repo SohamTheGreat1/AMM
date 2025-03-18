@@ -13,8 +13,13 @@ contract AMMHandlerTest is Test {
     function setUp() public {
         ERC20Mock token1 = new ERC20Mock();
         ERC20Mock token2 = new ERC20Mock();
-        amm = new AMM(address(token1), address(token2), 1000, 1000);
-        handler = new AMMHandler(amm);
+        amm = new AMM(address(token1), address(token2), 10000, 10000);
+
+        token1.mint(address(this), 10000);
+        token2.mint(address(this), 10000);
+
+        token1.approve(address(amm), 10000);
+        token2.approve(address(amm), 10000);
     }
 
     function testFuzz_AddLiquidity(uint256 amount1, uint256 amount2) public {
@@ -50,9 +55,8 @@ contract AMMHandlerTest is Test {
         assert(finalTotalSupply < initialTotalSupply);
     }
 
-    function testFuzz_Swap(uint256 addedTokenAmount, bool useToken1) public {
+    function testFuzz_Swap(address tokenAdded ,uint256 addedTokenAmount) public {
         addedTokenAmount = bound(addedTokenAmount, 1, 10000);
-        address tokenAdded = useToken1 ? address(amm.token1()) : address(amm.token2());
         uint256 initialToken1Reserve = amm.token1reserve();
         uint256 initialToken2Reserve = amm.token2reserve();
 
@@ -60,7 +64,7 @@ contract AMMHandlerTest is Test {
         uint256 finalToken1Reserve = amm.token1reserve();
         uint256 finalToken2Reserve = amm.token2reserve();
 
-        if (useToken1) {
+        if (tokenAdded == address(amm.token1())) {
             assert(finalToken1Reserve == initialToken1Reserve + addedTokenAmount);
             assert(finalToken2Reserve < initialToken2Reserve);
         } else {

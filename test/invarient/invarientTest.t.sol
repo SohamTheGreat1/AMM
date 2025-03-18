@@ -12,11 +12,22 @@ contract AMMTest is Test {
     ERC20Mock token2 = new ERC20Mock();
     AMM amm = new AMM(address(token1), address(token2), 1000, 1000);
 
+    function setUp() public {
+        token1 = new ERC20Mock();
+        token2 = new ERC20Mock();
+        amm = new AMM(address(token1), address(token2), 1000, 1000);
+
+        token1.mint(address(this), 1000);
+        token2.mint(address(this), 1000);
+
+        token1.approve(address(amm), 1000);
+        token2.approve(address(amm), 1000);
+    }
 
     function testConstantProduct() public view{
         uint256 token1reserve = amm.token1reserve();
         uint256 token2reserve = amm.token2reserve();
-        uint256 constantProduct = amm.constantProduct();
+        uint256 constantProduct = token1reserve * token2reserve;
         console.log("token1reserve: ", token1reserve);
         console.log("token2reserve: ", token2reserve);
         console.log("constantProduct: ", constantProduct);
@@ -42,11 +53,21 @@ contract AMMTest is Test {
 
     function testSwap() public {
         amm.addLiquidity(1000, 1000);
+
+        token1.mint(address(this), 100);
+        token2.mint(address(this), 100);
+
+        uint256 tolerance = 1;
+
+        token1.approve(address(amm), 100);
+        token2.approve(address(amm), 100);
+
         uint256 initialToken1Reserve = amm.token1reserve();
         uint256 initialToken2Reserve = amm.token2reserve();
-        amm.swap(address(token1), 100);
-        assertEq(amm.token1reserve(), initialToken1Reserve + 100);
-        assertEq(amm.token2reserve(), initialToken2Reserve - 100);
-    }
 
+        amm.swap(address(token1), 100);
+
+        assertEq(amm.token1reserve(), initialToken1Reserve + 100);
+        assertEq(amm.token2reserve(), tolerance + ((initialToken1Reserve * initialToken2Reserve) / (initialToken1Reserve + 100)));
+    }
 }
